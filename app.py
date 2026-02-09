@@ -11,8 +11,10 @@ st.markdown("""
     <style>
     .main-title { font-size: 30px; font-weight: bold; color: #0D47A1; }
     .stCode { background-color: rgba(240, 242, 246, 0.2) !important; border: 1px solid #0D47A1; border-radius: 10px; }
-    .price-card { background-color: rgba(13, 71, 161, 0.05); padding: 20px; border-radius: 10px; border-left: 6px solid #0D47A1; }
-    .big-number { font-size: 40px; font-weight: bold; color: #1B5E20; }
+    .price-card { background-color: rgba(13, 71, 161, 0.05); padding: 15px; border-radius: 10px; border-left: 6px solid #0D47A1; }
+    .profit-card { background-color: rgba(27, 94, 32, 0.05); padding: 15px; border-radius: 10px; border-left: 6px solid #2E7D32; }
+    .big-number { font-size: 32px; font-weight: bold; color: #0D47A1; }
+    .profit-number { font-size: 32px; font-weight: bold; color: #2E7D32; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -22,7 +24,7 @@ try:
 except:
     st.sidebar.warning("🛡️ ALFA METAIS")
 
-# 4. Dados e Configurações
+# 4. Dados Iniciais
 metais_dict = {
     "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350},
     "Cobre": {"ticker": "HG=F", "premio_padrao": 600},
@@ -40,59 +42,71 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
-# 5. Interface da Barra Lateral
+# 5. Barra Lateral - Controles de Venda
 st.sidebar.header("📋 Gestão da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente:", "Diretoria de Compras")
 produto_sel = st.sidebar.selectbox("Metal Selecionado:", list(metais_dict.keys()))
 
-# --- AJUSTE DE PRÊMIO MANUAL ---
+st.sidebar.divider()
+st.sidebar.subheader("💰 Parâmetros Financeiros")
 premio_base = metais_dict[produto_sel]["premio_padrao"]
-premio_ajustado = st.sidebar.number_input("Ajuste de Prêmio (US$):", value=float(premio_base), step=10.0)
+premio_ajustado = st.sidebar.number_input("Prêmio (US$):", value=float(premio_base), step=10.0)
+
+# CAMPO DE COMISSÃO EDITÁVEL
+pct_comissao = st.sidebar.slider("Sua Comissão (%)", 0.0, 10.0, 3.0, 0.5)
 
 unidade = st.sidebar.radio("Unidade de Medida:", ("Toneladas", "Quilos"), horizontal=True)
-passo = 0.1 if unidade == "Toneladas" else 50.0
-valor_padrao = 1.0 if unidade == "Toneladas" else 1000.0
-volume_input = st.sidebar.number_input(f"Volume em {unidade}:", value=valor_padrao, step=passo)
+volume_input = st.sidebar.number_input(f"Volume em {unidade}:", value=1.0 if unidade == "Toneladas" else 1000.0, step=0.1 if unidade == "Toneladas" else 50.0)
 
 ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
 
-# 6. Processamento
+# 6. Lógica de Negócio
 df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
 if not df_hist.empty:
     preco_lme = df_hist['Close'].iloc[-1]
     
-    # Cálculo com o Prêmio Ajustado pelo usuário
+    # Preço Final por KG
     preco_kg = ((preco_lme + premio_ajustado) * dolar_atual) / 1000
     venda_total = preco_kg * (ton_calculo * 1000)
+    
+    # Cálculo da Comissão
+    valor_comissao_total = venda_total * (pct_comissao / 100)
+    comissao_por_kg = preco_kg * (pct_comissao / 100)
 
-    # 7. Exibição
+    # 7. Interface Principal
     st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-    st.caption("Acesse: alfametaisrepresentacoes.com.br")
-
-    col1, col2 = st.columns([1, 2])
+    
+    col1, col2, col3 = st.columns([1.2, 1.2, 2])
 
     with col1:
-        st.subheader("💰 Cotação do Dia")
         st.markdown(f"""
         <div class="price-card">
-            <span style="font-size: 18px; color: #555;">Preço {produto_sel} (C/ Prêmio)</span><br>
-            <span class="big-number">R$ {preco_kg:.2f}/kg</span>
+            <span style="font-size: 14px; color: #555;">PREÇO DE VENDA</span><br>
+            <span class="big-number">R$ {preco_kg:.2f}/kg</span><br>
+            <small>Total: R$ {venda_total:,.2f}</small>
         </div>
         """, unsafe_allow_html=True)
-        
-        st.info(f"💵 **Dólar:** R$ {dolar_atual:.2f} | 🏛️ **LME:** US$ {preco_lme:.2f}")
-        st.write(f"🏷️ **Prêmio Aplicado:** US$ {premio_ajustado:.2f}")
-        st.success(f"**Total do Pedido:** R$ {venda_total:,.2f}")
+        st.info(f"💵 Dólar: R$ {dolar_atual:.2f}\n🏛️ LME: US$ {preco_lme:.2f}")
 
     with col2:
-        st.subheader(f"📊 Histórico LME: {produto_sel}")
+        # PAINEL DE COMISSÃO (Visível apenas para você no sistema)
+        st.markdown(f"""
+        <div class="profit-card">
+            <span style="font-size: 14px; color: #1B5E20;">SUA COMISSÃO ({pct_comissao}%)</span><br>
+            <span class="profit-number">R$ {valor_comissao_total:,.2f}</span><br>
+            <small>Ganhando R$ {comissao_por_kg:.3f} por kg</small>
+        </div>
+        """, unsafe_allow_html=True)
+        st.write(f"🏷️ Prêmio: US$ {premio_ajustado:.2f}")
+
+    with col3:
         fig = go.Figure(go.Bar(
             x=df_hist.index.strftime('%d/%m'),
             y=df_hist['Close'].round(2),
             marker_color='#0D47A1'
         ))
-        fig.update_layout(height=350, margin=dict(l=0,r=0,t=30,b=0))
+        fig.update_layout(height=230, margin=dict(l=0,r=0,t=10,b=0))
         st.plotly_chart(fig, use_container_width=True)
 
     # 8. Mensagem WhatsApp
@@ -120,8 +134,10 @@ Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
 
 Fico à disposição para fecharmos! 🤝"""
 
+    st.subheader("📱 Mensagem para WhatsApp")
     st.code(msg_zap, language="text")
+
 else:
-    st.error("Erro ao sincronizar dados.")
+    st.error("Erro na conexão com dados financeiros.")
 
 
