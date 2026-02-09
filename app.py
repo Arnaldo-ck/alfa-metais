@@ -24,10 +24,10 @@ except:
 
 # 4. Dados e Configurações
 metais_dict = {
-    "Alumínio P1020": {"ticker": "ALI=F", "spread": 350},
-    "Cobre": {"ticker": "HG=F", "spread": 600},
-    "Latão": {"ticker": "HG=F", "spread": 450}, 
-    "Zamac 5": {"ticker": "ZN=F", "spread": 500}
+    "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350},
+    "Cobre": {"ticker": "HG=F", "premio_padrao": 600},
+    "Latão": {"ticker": "HG=F", "premio_padrao": 450}, 
+    "Zamac 5": {"ticker": "ZN=F", "premio_padrao": 500}
 }
 
 @st.cache_data(ttl=3600)
@@ -40,35 +40,33 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
-# 5. Interface da Barra Lateral (Gestão da Proposta)
+# 5. Interface da Barra Lateral
 st.sidebar.header("📋 Gestão da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente:", "Diretoria de Compras")
 produto_sel = st.sidebar.selectbox("Metal Selecionado:", list(metais_dict.keys()))
 
-# --- NOVO SELETOR DE UNIDADE ---
+# --- AJUSTE DE PRÊMIO MANUAL ---
+premio_base = metais_dict[produto_sel]["premio_padrao"]
+premio_ajustado = st.sidebar.number_input("Ajuste de Prêmio (US$):", value=float(premio_base), step=10.0)
+
 unidade = st.sidebar.radio("Unidade de Medida:", ("Toneladas", "Quilos"), horizontal=True)
 passo = 0.1 if unidade == "Toneladas" else 50.0
 valor_padrao = 1.0 if unidade == "Toneladas" else 1000.0
-
 volume_input = st.sidebar.number_input(f"Volume em {unidade}:", value=valor_padrao, step=passo)
 
-# Lógica de conversão interna para cálculo (Sempre baseada em Toneladas para a LME)
 ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
 
-# 6. Processamento de Dados
+# 6. Processamento
 df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
 if not df_hist.empty:
     preco_lme = df_hist['Close'].iloc[-1]
-    spread = metais_dict[produto_sel]["spread"]
     
-    # Preço por KG: ((LME + Spread) * Dólar) / 1000
-    preco_kg = ((preco_lme + spread) * dolar_atual) / 1000
-    
-    # Valor Total: Preço por KG * Volume total em KG
+    # Cálculo com o Prêmio Ajustado pelo usuário
+    preco_kg = ((preco_lme + premio_ajustado) * dolar_atual) / 1000
     venda_total = preco_kg * (ton_calculo * 1000)
 
-    # 7. Exibição Principal
+    # 7. Exibição
     st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
     st.caption("Acesse: alfametaisrepresentacoes.com.br")
 
@@ -78,13 +76,13 @@ if not df_hist.empty:
         st.subheader("💰 Cotação do Dia")
         st.markdown(f"""
         <div class="price-card">
-            <span style="font-size: 18px; color: #555;">Preço Sugerido {produto_sel}</span><br>
+            <span style="font-size: 18px; color: #555;">Preço {produto_sel} (C/ Prêmio)</span><br>
             <span class="big-number">R$ {preco_kg:.2f}/kg</span>
         </div>
         """, unsafe_allow_html=True)
         
-        st.write("")
         st.info(f"💵 **Dólar:** R$ {dolar_atual:.2f} | 🏛️ **LME:** US$ {preco_lme:.2f}")
+        st.write(f"🏷️ **Prêmio Aplicado:** US$ {premio_ajustado:.2f}")
         st.success(f"**Total do Pedido:** R$ {venda_total:,.2f}")
 
     with col2:
@@ -92,17 +90,13 @@ if not df_hist.empty:
         fig = go.Figure(go.Bar(
             x=df_hist.index.strftime('%d/%m'),
             y=df_hist['Close'].round(2),
-            text=df_hist['Close'].round(2),
-            textposition='outside',
             marker_color='#0D47A1'
         ))
-        fig.update_layout(height=350, margin=dict(l=0,r=0,t=30,b=0), dragmode=False)
-        st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
+        fig.update_layout(height=350, margin=dict(l=0,r=0,t=30,b=0))
+        st.plotly_chart(fig, use_container_width=True)
 
-    # 8. Mensagem para WhatsApp (Adaptável KG/Ton)
+    # 8. Mensagem WhatsApp
     st.divider()
-    st.subheader("📱 Mensagem para WhatsApp")
-    
     vol_display = f"{volume_input} Toneladas" if unidade == "Toneladas" else f"{volume_input} KG"
     
     msg_zap = f"""Olá, *{cliente}*! 👋
@@ -119,6 +113,7 @@ Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
 🌐 *DADOS DE MERCADO*
 📈 LME: US$ {preco_lme:.2f}
 💵 Câmbio: R$ {dolar_atual:.2f}
+🏷️ Prêmio: US$ {premio_ajustado:.2f}
 
 ⏳ *VALIDADE:* 24 Horas
 ⚠️ _Preço sujeito a variação conforme fechamento da LME._
@@ -126,9 +121,7 @@ Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
 Fico à disposição para fecharmos! 🤝"""
 
     st.code(msg_zap, language="text")
-    st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
-
 else:
-    st.error("Erro ao sincronizar com o mercado financeiro.")
+    st.error("Erro ao sincronizar dados.")
 
 
