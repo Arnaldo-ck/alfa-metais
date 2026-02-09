@@ -88,6 +88,7 @@ if not df_hist.empty:
     st.divider()
     st.subheader("📱 Mensagem para WhatsApp")
     
+    # MENSAGEM FORMATADA (Agora com Valor Total)
     msg_zap = f"""Olá, *{cliente}*! 👋
 
 Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
@@ -95,17 +96,21 @@ Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
 📦 *MATERIAL:* {produto_sel.upper()}
 💰 *VALOR:* R$ {preco_kg:.2f}/kg
 ⚖️ *VOLUME:* {ton} Toneladas
+------------------------------
+💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}
+------------------------------
 
 🌐 *DADOS DE MERCADO*
 📈 LME: US$ {preco_lme:.2f}
 💵 Câmbio: R$ {dolar_atual:.2f}
-------------------------------
+
 ⏳ *VALIDADE:* 24 Horas
 ⚠️ _Preço sujeito a variação conforme fechamento da LME._
 
-Fico à disposição! 🤝"""
+Fico à disposição para fecharmos! 🤝"""
 
     st.code(msg_zap, language="text")
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
+
