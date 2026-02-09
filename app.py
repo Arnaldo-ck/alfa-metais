@@ -4,7 +4,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # 1. Configuração da Página
-st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide")
+st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
 # 2. CSS para visual profissional
 st.markdown("""
@@ -17,13 +17,12 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 3. Logo na Barra Lateral
-# Substitua o link abaixo pelo link que você copiou do GitHub se este não carregar
 try:
     st.sidebar.image("Alfa.png", use_container_width=True)
 except:
-    st.sidebar.warning("Carregando Identidade Visual...")
+    st.sidebar.warning("🛡️ ALFA METAIS")
 
-# 4. Dados e Dicionário
+# 4. Dados e Configurações
 metais_dict = {
     "Alumínio P1020": {"ticker": "ALI=F", "spread": 350},
     "Cobre": {"ticker": "HG=F", "spread": 600},
@@ -41,22 +40,37 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
-# 5. Interface Principal
-st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-st.caption("Acesse: alfametaisrepresentacoes.com.br")
-
+# 5. Interface da Barra Lateral (Gestão da Proposta)
 st.sidebar.header("📋 Gestão da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente:", "Diretoria de Compras")
 produto_sel = st.sidebar.selectbox("Metal Selecionado:", list(metais_dict.keys()))
-ton = st.sidebar.number_input("Volume (Toneladas):", value=25.0, step=1.0)
 
+# --- NOVO SELETOR DE UNIDADE ---
+unidade = st.sidebar.radio("Unidade de Medida:", ("Toneladas", "Quilos"), horizontal=True)
+passo = 0.1 if unidade == "Toneladas" else 50.0
+valor_padrao = 1.0 if unidade == "Toneladas" else 1000.0
+
+volume_input = st.sidebar.number_input(f"Volume em {unidade}:", value=valor_padrao, step=passo)
+
+# Lógica de conversão interna para cálculo (Sempre baseada em Toneladas para a LME)
+ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
+
+# 6. Processamento de Dados
 df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
 if not df_hist.empty:
     preco_lme = df_hist['Close'].iloc[-1]
     spread = metais_dict[produto_sel]["spread"]
+    
+    # Preço por KG: ((LME + Spread) * Dólar) / 1000
     preco_kg = ((preco_lme + spread) * dolar_atual) / 1000
-    venda_total = preco_kg * ton * 1000
+    
+    # Valor Total: Preço por KG * Volume total em KG
+    venda_total = preco_kg * (ton_calculo * 1000)
+
+    # 7. Exibição Principal
+    st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
+    st.caption("Acesse: alfametaisrepresentacoes.com.br")
 
     col1, col2 = st.columns([1, 2])
 
@@ -85,17 +99,19 @@ if not df_hist.empty:
         fig.update_layout(height=350, margin=dict(l=0,r=0,t=30,b=0), dragmode=False)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
+    # 8. Mensagem para WhatsApp (Adaptável KG/Ton)
     st.divider()
     st.subheader("📱 Mensagem para WhatsApp")
     
-    # MENSAGEM FORMATADA (Agora com Valor Total)
+    vol_display = f"{volume_input} Toneladas" if unidade == "Toneladas" else f"{volume_input} KG"
+    
     msg_zap = f"""Olá, *{cliente}*! 👋
 
 Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
 
 📦 *MATERIAL:* {produto_sel.upper()}
 💰 *VALOR:* R$ {preco_kg:.2f}/kg
-⚖️ *VOLUME:* {ton} Toneladas
+⚖️ *VOLUME:* {vol_display}
 ------------------------------
 💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}
 ------------------------------
@@ -111,6 +127,8 @@ Fico à disposição para fecharmos! 🤝"""
 
     st.code(msg_zap, language="text")
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
+
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
+
 
