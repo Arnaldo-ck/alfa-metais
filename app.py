@@ -115,7 +115,7 @@ if not df_hist.empty:
     
     msg_zap = f"""Olá, *{cliente}*! 👋
 
-Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
+Abaixo, a cotação oficializada pela *ALFA METAIS REPRESENTAÇÕES* para sua análise:
 
 📦 *MATERIAL:* {produto_sel.upper()}
 💰 *VALOR:* R$ {preco_kg:.2f}/kg
@@ -139,5 +139,6 @@ Fico à disposição para fecharmos! 🤝"""
 
 else:
     st.error("Erro na conexão com dados financeiros.")
+
 
 
