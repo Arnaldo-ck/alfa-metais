@@ -1,24 +1,12 @@
-st.set_page_config(
-    page_title="ALFA METAIS - Intelligence", 
-    page_icon="https://github.com/Arnaldo-ck/alfa-metais/blob/main/Alfa.png?raw=true", # Aqui a tua logo vira o ícone da aba
-    layout="wide"
-)
-
-# Exibir a Logo na Barra Lateral
-st.sidebar.image("https://github.com/Arnaldo-ck/alfa-metais/blob/main/Alfa.png?raw=true", use_container_width=True)
-
-# Ou se preferires no topo da página principal:
-# st.image("logo.png", width=200)
-
 import streamlit as st
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
 
-# Configuração da Página com Branding Novo
+# 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide")
 
-# CSS para remover o fundo branco do st.code e ajustar fontes
+# 2. CSS para visual profissional
 st.markdown("""
     <style>
     .main-title { font-size: 30px; font-weight: bold; color: #0D47A1; }
@@ -28,6 +16,14 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# 3. Logo na Barra Lateral
+# Substitua o link abaixo pelo link que você copiou do GitHub se este não carregar
+try:
+    st.sidebar.image("Alfa.png", use_container_width=True)
+except:
+    st.sidebar.warning("Carregando Identidade Visual...")
+
+# 4. Dados e Dicionário
 metais_dict = {
     "Alumínio P1020": {"ticker": "ALI=F", "spread": 350},
     "Cobre": {"ticker": "HG=F", "spread": 600},
@@ -45,6 +41,7 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
+# 5. Interface Principal
 st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
 st.caption("Acesse: alfametaisrepresentacoes.com.br")
 
@@ -91,7 +88,6 @@ if not df_hist.empty:
     st.divider()
     st.subheader("📱 Mensagem para WhatsApp")
     
-   # MENSAGEM FORMATADA (Ajustada para Nuvem)
     msg_zap = f"""Olá, *{cliente}*! 👋
 
 Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
@@ -113,6 +109,3 @@ Fico à disposição! 🤝"""
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
-
-
-
