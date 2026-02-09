@@ -6,10 +6,10 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
-# 2. CSS Customizado - Foco em Contraste e Legibilidade
+# 2. CSS - Foco em Cards Elegantes e Fontes Grandes
 st.markdown("""
     <style>
-    /* 1. Título com borda fina branca (Text Stroke Effect) */
+    /* Título com contorno branco fino */
     .brand-title { 
         font-size: 42px !important; 
         font-weight: 800; 
@@ -18,7 +18,7 @@ st.markdown("""
         margin-bottom: 0px; 
     }
     
-    /* 2. Subtítulo maior */
+    /* Subtítulo maior e nítido */
     .brand-subtitle { 
         font-size: 20px !important; 
         color: #fff; 
@@ -27,34 +27,37 @@ st.markdown("""
         margin-bottom: 25px; 
     }
     
-    /* 3. Ajuste das Caixas de Texto (Removendo fundos brancos e ajustando cores) */
+    /* Cards Brancos Elegantes */
     .metric-card { 
-        background-color: transparent !important; 
-        padding: 20px; 
-        border-radius: 12px; 
-        border: 2px solid rgba(255,255,255,0.2);
+        background-color: white !important; 
+        padding: 25px; 
+        border-radius: 15px; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-bottom: 5px solid #0D47A1;
+        margin-bottom: 20px;
     }
-    .metric-label { font-size: 22px !important; font-weight: 700; color: #fff !important; text-transform: uppercase; }
-    .price-value { font-size: 52px !important; font-weight: 900; color: #fff !important; }
-    .profit-value { font-size: 52px !important; font-weight: 900; color: #00E676 !important; } /* Verde vibrante para comissão */
-    .sub-value { font-size: 22px !important; color: #ddd !important; font-weight: 500; }
     
-    /* 4. Badges de Mercado maiores e sem fundo branco */
+    /* Fontes dentro dos Cards */
+    .metric-label { font-size: 20px !important; font-weight: 700; color: #444 !important; text-transform: uppercase; margin-bottom: 10px; }
+    .price-value { font-size: 50px !important; font-weight: 900; color: #0D47A1 !important; line-height: 1; }
+    .profit-value { font-size: 50px !important; font-weight: 900; color: #2E7D32 !important; line-height: 1; }
+    .sub-value { font-size: 22px !important; color: #666 !important; font-weight: 600; margin-top: 8px; }
+
+    /* Badges de Mercado (Texto Branco e Grande) */
+    .market-info-container { margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 15px; }
     .market-badge {
-        background-color: rgba(255,255,255,0.1) !important;
-        padding: 10px 18px;
-        border-radius: 8px;
+        background-color: rgba(255,255,255,0.15);
+        padding: 12px 20px;
+        border-radius: 10px;
         font-weight: 700;
-        font-size: 20px !important;
+        font-size: 22px !important; /* Fonte aumentada como solicitado */
         color: #fff !important;
-        display: inline-block;
-        margin-right: 15px;
-        border: 1px solid rgba(255,255,255,0.3);
+        border: 1px solid rgba(255,255,255,0.2);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. Funções de Dados e Sidebar (Mantendo a estrutura anterior)
+# 3. Logo e Dados
 try:
     st.sidebar.image("Alfa.png", use_container_width=True)
 except:
@@ -77,7 +80,7 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
-# Sidebar - Controles
+# 4. Sidebar
 st.sidebar.header("📋 Parâmetros")
 cliente = st.sidebar.text_input("Cliente:", "Diretoria de Compras")
 produto_sel = st.sidebar.selectbox("Produto:", list(metais_dict.keys()))
@@ -88,7 +91,7 @@ unidade = st.sidebar.radio("Unidade:", ("Toneladas", "Quilos"), horizontal=True)
 volume_input = st.sidebar.number_input(f"Volume:", value=1.0 if unidade == "Toneladas" else 1000.0)
 ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
 
-# 6. Cálculos
+# 5. Cálculos
 df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
 if not df_hist.empty:
@@ -98,39 +101,40 @@ if not df_hist.empty:
     valor_comissao_total = venda_total * (pct_comissao / 100)
     comissao_por_kg = preco_kg * (pct_comissao / 100)
 
-    # 7. Cabeçalho Principal
+    # 6. Cabeçalho e Badges de Mercado
     st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
     st.markdown('<p class="brand-subtitle">Terminal de Inteligência Comercial | alfametaisrepresentacoes.com.br</p>', unsafe_allow_html=True)
 
-    # Grid de Indicadores de Mercado (Fontes Aumentadas conforme solicitado)
+    # Badges de Mercado com fontes grandes e brancas
     st.markdown(f"""
-        <div style="margin-bottom: 30px;">
+        <div class="market-info-container">
             <div class="market-badge">💵 Dólar: R$ {dolar_atual:.2f}</div>
             <div class="market-badge">🏛️ LME {produto_sel}: US$ {preco_lme:.2f}</div>
             <div class="market-badge">🏷️ Prêmio: US$ {premio_ajustado:.2f}</div>
         </div>
     """, unsafe_allow_html=True)
 
-    # 8. Grid de Resultados (Removido fundo branco, texto em destaque)
+    # 7. Exibição dos Cards (Revertido para Branco Elegante)
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
         <div class="metric-card">
             <div class="metric-label">💰 Preço de Venda</div>
             <div class="price-value">R$ {preco_kg:.2f}<span style="font-size: 24px;">/kg</span></div>
-            <div class="sub-value">Total: R$ {venda_total:,.2f}</div>
+            <div class="sub-value">Total do Pedido: R$ {venda_total:,.2f}</div>
         </div>
         """, unsafe_allow_html=True)
 
     with col2:
         st.markdown(f"""
-        <div class="metric-card">
+        <div class="metric-card" style="border-bottom-color: #2E7D32;">
             <div class="metric-label">🟢 Sua Comissão ({pct_comissao}%)</div>
             <div class="profit-value">R$ {valor_comissao_total:,.2f}</div>
-            <div class="sub-value">Ganho: R$ {comissao_por_kg:.3f} /kg</div>
+            <div class="sub-value">Ganhando R$ {comissao_por_kg:.3f} por kg</div>
         </div>
         """, unsafe_allow_html=True)
 
+    # 8. Gráfico
     st.write("") 
     st.subheader(f"📊 Histórico LME: {produto_sel}")
     fig = go.Figure(go.Bar(
@@ -138,25 +142,41 @@ if not df_hist.empty:
         y=df_hist['Close'].round(2),
         text=df_hist['Close'].round(2),
         textposition='outside',
-        marker_color='#fff' # Gráfico em branco para contrastar com o fundo escuro
+        marker_color='#0D47A1'
     ))
-    fig.update_layout(
-        height=300, 
-        paper_bgcolor='rgba(0,0,0,0)', 
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(color="white"),
-        margin=dict(l=0,r=0,t=30,b=0)
-    )
+    fig.update_layout(height=300, margin=dict(l=0,r=0,t=30,b=0))
     st.plotly_chart(fig, use_container_width=True)
 
-    # 10. WhatsApp
+    # 9. WhatsApp
     st.divider()
     vol_display = f"{volume_input} Toneladas" if unidade == "Toneladas" else f"{volume_input} KG"
-    msg_zap = f"""Olá, *{cliente}*! 👋...""" # Mantendo lógica da mensagem
+    msg_zap = f"""Olá, *{cliente}*! 👋
+
+Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
+
+📦 *MATERIAL:* {produto_sel.upper()}
+💰 *VALOR:* R$ {preco_kg:.2f}/kg
+⚖️ *VOLUME:* {vol_display}
+------------------------------
+💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}
+------------------------------
+
+🌐 *DADOS DE MERCADO*
+📈 LME: US$ {preco_lme:.2f}
+💵 Câmbio: R$ {dolar_atual:.2f}
+🏷️ Prêmio: US$ {premio_ajustado:.2f}
+
+⏳ *VALIDADE:* 24 Horas
+⚠️ _Preço sujeito a variação conforme fechamento da LME._
+
+Fico à disposição para fecharmos! 🤝"""
+
+    st.subheader("📱 Gerar Proposta WhatsApp")
     st.code(msg_zap, language="text")
 
 else:
-    st.error("Erro ao sincronizar.")
+    st.error("Erro na sincronização.")
+
 
 
 
