@@ -1,3 +1,15 @@
+st.set_page_config(
+    page_title="ALFA METAIS - Intelligence", 
+    page_icon="Alfa.png", # Aqui a tua logo vira o ícone da aba
+    layout="wide"
+)
+
+# Exibir a Logo na Barra Lateral
+st.sidebar.image("Alfa.png", use_container_width=True)
+
+# Ou se preferires no topo da página principal:
+# st.image("logo.png", width=200)
+
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -101,4 +113,5 @@ Fico à disposição! 🤝"""
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
+
 
