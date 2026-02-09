@@ -79,20 +79,26 @@ if not df_hist.empty:
     st.divider()
     st.subheader("📱 Mensagem para WhatsApp")
     
-    msg_zap = f"Olá, *{cliente}*! 👋\\n\\n" \
-              f"Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:\\n\\n" \
-              f"📦 *MATERIAL:* {produto_sel.upper()}\\n" \
-              f"💰 *VALOR:* R$ {preco_kg:.2f}/kg\\n" \
-              f"⚖️ *VOLUME:* {ton} Toneladas\\n\\n" \
-              f"🌐 *DADOS DE MERCADO*\\n" \
-              f"📈 LME: US$ {preco_lme:.2f}\\n" \
-              f"💵 Câmbio: R$ {dolar_atual:.2f}\\n" \
-              f"------------------------------\\n" \
-              f"⏳ *VALIDADE:* 24 Horas\\n" \
-              f"⚠️ _Preço sujeito a variação conforme fechamento da LME._\\n\\n" \
-              f"Fico à disposição! 🤝"
+   # MENSAGEM FORMATADA (Ajustada para Nuvem)
+    msg_zap = f"""Olá, *{cliente}*! 👋
+
+Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
+
+📦 *MATERIAL:* {produto_sel.upper()}
+💰 *VALOR:* R$ {preco_kg:.2f}/kg
+⚖️ *VOLUME:* {ton} Toneladas
+
+🌐 *DADOS DE MERCADO*
+📈 LME: US$ {preco_lme:.2f}
+💵 Câmbio: R$ {dolar_atual:.2f}
+------------------------------
+⏳ *VALIDADE:* 24 Horas
+⚠️ _Preço sujeito a variação conforme fechamento da LME._
+
+Fico à disposição! 🤝"""
 
     st.code(msg_zap, language="text")
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
+
