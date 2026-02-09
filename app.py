@@ -1,9 +1,3 @@
-# 1. Instalação
-!pip install -q streamlit pyngrok yfinance plotly
-
-# 2. Configuração do Sistema ALFA METAIS
-with open('app.py', 'w') as f:
-    f.write('''
 import streamlit as st
 import yfinance as yf
 import pandas as pd
@@ -39,11 +33,9 @@ def carregar_dados_metal(ticker):
     except:
         return pd.DataFrame(), 5.20
 
-# Título Atualizado conforme solicitado
 st.markdown('<p class="main-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
 st.caption("Acesse: alfametaisrepresentacoes.com.br")
 
-# Barra Lateral
 st.sidebar.header("📋 Gestão da Proposta")
 cliente = st.sidebar.text_input("Nome do Cliente:", "Diretoria de Compras")
 produto_sel = st.sidebar.selectbox("Metal Selecionado:", list(metais_dict.keys()))
@@ -84,7 +76,6 @@ if not df_hist.empty:
         fig.update_layout(height=350, margin=dict(l=0,r=0,t=30,b=0), dragmode=False)
         st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
 
-    # SEÇÃO DE EXPORTAÇÃO AJUSTADA (Sem fundo branco berrante)
     st.divider()
     st.subheader("📱 Mensagem para WhatsApp")
     
@@ -101,20 +92,7 @@ if not df_hist.empty:
               f"⚠️ _Preço sujeito a variação conforme fechamento da LME._\\n\\n" \
               f"Fico à disposição! 🤝"
 
-    # O campo agora terá um fundo integrado
     st.code(msg_zap, language="text")
     st.caption("Passe o mouse sobre o campo acima e clique no ícone de cópia à direita.")
-
 else:
     st.error("Erro ao sincronizar com o mercado financeiro.")
-    ''')
-
-# 3. Túnel ngrok
-from pyngrok import ngrok
-ngrok.kill()
-ngrok.set_auth_token("39OgixlCpkrYomUmULBtvcL7oKc_Ne6nWZqGUjP8UBTAxqTB")
-
-url = ngrok.connect(8501).public_url
-print(f"🚀 ALFA METAIS ONLINE: {url}")
-
-!streamlit run app.py & npx localtunnel --port 8501
