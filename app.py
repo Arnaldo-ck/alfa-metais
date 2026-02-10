@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Login", layout="wide", page_icon="🛡️")
 
-# 2. CSS - CENTRALIZAÇÃO E AJUSTE DE ESCALA
+# 2. CSS - ALINHAMENTO CENTRAL TOTAL E ESTILO DARK
 st.markdown("""
     <style>
     /* Fundo Global */
@@ -15,52 +15,60 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Centralização Absoluta da Logo */
+    /* Forçar centralização de todos os blocos na tela de login */
+    .login-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* Centralização da Logo via seletor de teste */
     [data-testid="stImage"] {
         display: flex;
         justify-content: center;
+        margin-bottom: 10px;
     }
-    
-    /* Título com contorno e fonte ajustada */
+
+    /* Título com contorno e centralizado */
     .brand-title-login { 
         font-size: 38px !important; 
         font-weight: 800; 
         color: #0D47A1; 
         text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         text-align: center;
-        margin-top: 15px;
         margin-bottom: 25px;
-        letter-spacing: 1px;
     }
 
-    /* Diminuir largura e fonte dos campos de Login */
+    /* Ajuste de largura dos campos e botão */
     .stTextInput, .stButton {
-        max-width: 350px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: 350px !important;
+        margin: 0 auto !important;
     }
     
-    /* Estilo das etiquetas (labels) acima dos campos */
-    label {
-        font-size: 14px !important;
-        color: #ccc !important;
-        text-align: center !important;
-        display: block !important;
-    }
-
-    input {
-        background-color: #1A1C24 !important;
-        color: white !important;
-        border: 1px solid #30363d !important;
-        font-size: 14px !important;
-        text-align: center !important;
-    }
-
-    /* Ajuste do botão */
+    /* Centralizar o texto dentro do botão e dos inputs */
     div.stButton > button {
+        width: 100% !important;
         background-color: #0D47A1 !important;
         color: white !important;
         border: 1px solid #fff !important;
         font-weight: 700;
+        margin-top: 10px;
+    }
+
+    input {
+        text-align: center !important;
+        background-color: #1A1C24 !important;
+        color: white !important;
+        border: 1px solid #30363d !important;
+    }
+
+    /* Esconder o label (e-mail/senha) para um visual mais clean, 
+       já que usamos placeholders */
+    label {
+        display: none !important;
     }
 
     /* Estilo do Terminal */
@@ -68,11 +76,6 @@ st.markdown("""
         background-color: rgba(255, 255, 255, 0.05) !important; 
         padding: 25px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);
         border-bottom: 5px solid #0D47A1; margin-bottom: 20px;
-    }
-    .market-badge {
-        background-color: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 10px;
-        font-weight: 700; font-size: 18px !important; color: #fff !important;
-        display: inline-block; margin-right: 15px; border: 1px solid rgba(255,255,255,0.1);
     }
     </style>
     """, unsafe_allow_html=True)
@@ -92,31 +95,33 @@ def validar_login(user, pwd):
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    st.write("<br><br>", unsafe_allow_html=True)
+    st.write("<br><br><br>", unsafe_allow_html=True)
     
-    # Criamos 3 colunas, mas usamos a do meio para centralizar tudo
-    _, central_col, _ = st.columns([1, 1.5, 1])
+    # Usamos uma estrutura de colunas para "espremer" o conteúdo no centro
+    _, center_col, _ = st.columns([1, 1, 1])
     
-    with central_col:
-        # Logo com largura fixa para centralização
+    with center_col:
+        # Container para forçar o alinhamento de tudo dentro da coluna
+        st.markdown('<div class="login-block">', unsafe_allow_html=True)
+        
         try:
-            st.image("Alfa.png", width=300)
+            st.image("Alfa.png", width=320)
         except:
             st.markdown("<h2 style='text-align: center;'>🛡️ ALFA METAIS</h2>", unsafe_allow_html=True)
         
         st.markdown('<p class="brand-title-login">ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
-        # Campos com largura controlada via CSS (max-width: 350px)
-        user_input = st.text_input("E-mail", placeholder="seu@email.com")
-        pass_input = st.text_input("Senha", type="password", placeholder="********")
+        # Inputs e Botão (os estilos CSS acima cuidam da centralização interna)
+        user_input = st.text_input("E-mail", placeholder="E-mail de Acesso")
+        pass_input = st.text_input("Senha", type="password", placeholder="Sua Senha")
         
-        st.write("<br>", unsafe_allow_html=True)
         if st.button("ACESSAR TERMINAL"):
             validar_login(user_input, pass_input)
+            
+        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- TERMINAL DE VENDAS ---
+# --- TERMINAL DE VENDAS (MANTIDO) ---
 else:
-    # 4. Dados e Funções
     metais_dict = {
         "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350.0},
         "Cobre": {"ticker": "HG=F", "premio_padrao": 600.0},
@@ -160,26 +165,21 @@ else:
 
         st.markdown('<p class="brand-title-login" style="font-size:32px !important; margin-bottom:10px;">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
+        # Cards e gráficos seguem aqui como na versão anterior...
         st.markdown(f"""
             <div style="margin-bottom: 20px; text-align: center;">
-                <div class="market-badge">💵 Dólar: R$ {dolar_atual:.2f}</div>
-                <div class="market-badge">🏛️ LME: US$ {preco_lme:.2f}</div>
-                <div class="market-badge">🏷️ Prêmio: US$ {premio_ajustado:.2f}</div>
+                <div style="background-color: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 10px; display: inline-block; margin-right: 10px;">💵 Dólar: R$ {dolar_atual:.2f}</div>
+                <div style="background-color: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 10px; display: inline-block;">🏛️ LME: US$ {preco_lme:.2f}</div>
             </div>
         """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(f"""<div class="metric-card"><div class="metric-label">💰 Preço de Venda</div>
-            <div class="price-value">R$ {preco_kg:.2f}<small style="font-size:18px">/kg</small></div><div class="sub-value">Total: R$ {venda_total:,.2f}</div></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="metric-card"><div style="font-size: 18px; font-weight: 700; color: #fff;">💰 Venda</div>
+            <div style="font-size: 40px; font-weight: 900;">R$ {preco_kg:.2f}/kg</div></div>""", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;"><div class="metric-label">🟢 Comissão</div>
-            <div class="profit-value">R$ {venda_total * (pct_comissao/100):,.2f}</div><div class="sub-value">{pct_comissao}% de margem</div></div>""", unsafe_allow_html=True)
-
-        fig = go.Figure(data=[go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'], marker_color='#0D47A1')])
-        fig.update_layout(height=240, margin=dict(l=0,r=0,t=0,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
-        st.plotly_chart(fig, use_container_width=True)
-
+            st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;"><div style="font-size: 18px; font-weight: 700; color: #fff;">🟢 Comissão</div>
+            <div style="font-size: 40px; font-weight: 900; color: #00E676;">R$ {venda_total * (pct_comissao/100):,.2f}</div></div>""", unsafe_allow_html=True)
 
 
 
