@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Login", layout="wide", page_icon="🛡️")
 
-# 2. CSS - ESTILO DARK TOTAL E CENTRALIZAÇÃO ABSOLUTA
+# 2. CSS - CENTRALIZAÇÃO E AJUSTE DE ESCALA
 st.markdown("""
     <style>
     /* Fundo Global */
@@ -15,35 +15,52 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Centralização Total da Logo e Título */
-    .stImage > img {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
+    /* Centralização Absoluta da Logo */
+    [data-testid="stImage"] {
+        display: flex;
+        justify-content: center;
     }
     
-    .centered-text {
-        text-align: center;
-        width: 100%;
-    }
-
-    /* Título com contorno branco fino */
+    /* Título com contorno e fonte ajustada */
     .brand-title-login { 
-        font-size: 48px !important; 
+        font-size: 38px !important; 
         font-weight: 800; 
         color: #0D47A1; 
         text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
         text-align: center;
-        margin-top: 20px;
-        margin-bottom: 30px;
-        letter-spacing: 2px;
+        margin-top: 15px;
+        margin-bottom: 25px;
+        letter-spacing: 1px;
     }
 
-    /* Estilização dos Inputs */
+    /* Diminuir largura e fonte dos campos de Login */
+    .stTextInput, .stButton {
+        max-width: 350px;
+        margin: 0 auto;
+    }
+    
+    /* Estilo das etiquetas (labels) acima dos campos */
+    label {
+        font-size: 14px !important;
+        color: #ccc !important;
+        text-align: center !important;
+        display: block !important;
+    }
+
     input {
         background-color: #1A1C24 !important;
         color: white !important;
         border: 1px solid #30363d !important;
+        font-size: 14px !important;
+        text-align: center !important;
+    }
+
+    /* Ajuste do botão */
+    div.stButton > button {
+        background-color: #0D47A1 !important;
+        color: white !important;
+        border: 1px solid #fff !important;
+        font-weight: 700;
     }
 
     /* Estilo do Terminal */
@@ -54,7 +71,7 @@ st.markdown("""
     }
     .market-badge {
         background-color: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 10px;
-        font-weight: 700; font-size: 20px !important; color: #fff !important;
+        font-weight: 700; font-size: 18px !important; color: #fff !important;
         display: inline-block; margin-right: 15px; border: 1px solid rgba(255,255,255,0.1);
     }
     </style>
@@ -75,32 +92,31 @@ def validar_login(user, pwd):
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    # Espaçamento superior para centralizar verticalmente
     st.write("<br><br>", unsafe_allow_html=True)
     
-    col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
+    # Criamos 3 colunas, mas usamos a do meio para centralizar tudo
+    _, central_col, _ = st.columns([1, 1.5, 1])
     
-    with col_l2:
-        # Centralizando a Logo
+    with central_col:
+        # Logo com largura fixa para centralização
         try:
-            st.image("Alfa.png", width=350)
+            st.image("Alfa.png", width=300)
         except:
             st.markdown("<h2 style='text-align: center;'>🛡️ ALFA METAIS</h2>", unsafe_allow_html=True)
         
-        # Título Centralizado com o nome corrigido
         st.markdown('<p class="brand-title-login">ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
-        # Inputs centralizados através da coluna
-        user_input = st.text_input("E-mail de Acesso", placeholder="seu@email.com")
+        # Campos com largura controlada via CSS (max-width: 350px)
+        user_input = st.text_input("E-mail", placeholder="seu@email.com")
         pass_input = st.text_input("Senha", type="password", placeholder="********")
         
         st.write("<br>", unsafe_allow_html=True)
-        if st.button("ACESSAR TERMINAL", use_container_width=True):
+        if st.button("ACESSAR TERMINAL"):
             validar_login(user_input, pass_input)
 
 # --- TERMINAL DE VENDAS ---
 else:
-    # 4. Dados (Mantendo sua lógica funcional)
+    # 4. Dados e Funções
     metais_dict = {
         "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350.0},
         "Cobre": {"ticker": "HG=F", "premio_padrao": 600.0},
@@ -120,7 +136,6 @@ else:
     if 'reset_trigger' not in st.session_state: st.session_state.reset_trigger = 0
     def limpar_campos(): st.session_state.reset_trigger += 1
     
-    # Barra Lateral
     st.sidebar.button("🧹 LIMPAR TUDO", on_click=limpar_campos)
     if st.sidebar.button("🚪 SAIR"):
         st.session_state.autenticado = False
@@ -143,7 +158,7 @@ else:
         preco_kg = ((preco_lme + premio_ajustado) * dolar_atual) / 1000
         venda_total = preco_kg * (volume_input if unidade == "Toneladas" else volume_input / 1000) * 1000
 
-        st.markdown('<p class="brand-title-login" style="font-size:32px !important;">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
+        st.markdown('<p class="brand-title-login" style="font-size:32px !important; margin-bottom:10px;">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
         st.markdown(f"""
             <div style="margin-bottom: 20px; text-align: center;">
@@ -159,11 +174,12 @@ else:
             <div class="price-value">R$ {preco_kg:.2f}<small style="font-size:18px">/kg</small></div><div class="sub-value">Total: R$ {venda_total:,.2f}</div></div>""", unsafe_allow_html=True)
         with col2:
             st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;"><div class="metric-label">🟢 Comissão</div>
-            <div class="profit-value">R$ {venda_total * (pct_comissao/100):,.2f}</div><div class="sub-value">{pct_comissao}% de comissão</div></div>""", unsafe_allow_html=True)
+            <div class="profit-value">R$ {venda_total * (pct_comissao/100):,.2f}</div><div class="sub-value">{pct_comissao}% de margem</div></div>""", unsafe_allow_html=True)
 
         fig = go.Figure(data=[go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'], marker_color='#0D47A1')])
-        fig.update_layout(height=250, margin=dict(l=0,r=0,t=0,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        fig.update_layout(height=240, margin=dict(l=0,r=0,t=0,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
         st.plotly_chart(fig, use_container_width=True)
+
 
 
 
