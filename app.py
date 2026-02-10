@@ -6,64 +6,56 @@ import plotly.graph_objects as go
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
-# 2. CSS DEFINITIVO - FOCO EM CENTRALIZAÇÃO E TAMANHO FIXO
+# 2. CSS DEFINITIVO PARA CENTRALIZAÇÃO TOTAL
 st.markdown("""
     <style>
-    /* Fundo Dark */
+    /* Fundo Dark Global */
     .stApp {
         background-color: #0E1117 !important;
     }
 
-    /* CONTAINER CENTRAL DE LOGIN */
-    /* Criamos uma div para limitar o tamanho de tudo no centro */
-    .main-login-container {
-        max-width: 350px;
-        margin: 0 auto;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* AJUSTE DA LOGO */
+    /* Forçar centralização da Logo */
     [data-testid="stImage"] {
         display: flex;
         justify-content: center;
-        margin-bottom: 20px;
-    }
-    [data-testid="stImage"] img {
-        max-width: 250px !important; /* Controla o tamanho da logo para não ficar gigante */
+        margin-left: auto;
+        margin-right: auto;
     }
 
-    /* CAMPOS DE INPUT */
+    /* Centralizar Títulos */
+    h1, h2, h3, p {
+        text-align: center !important;
+        color: white !important;
+    }
+
+    /* Ajuste dos Inputs */
     .stTextInput div div input {
         background-color: #1A1C24 !important;
         color: white !important;
         border: 1px solid #30363d !important;
-        border-radius: 5px !important;
-        height: 45px;
+        text-align: center;
     }
 
-    /* BOTÃO ACESSAR TERMINAL - CENTRALIZAÇÃO REAL */
+    /* CENTRALIZAÇÃO DO BOTÃO - O ponto mais difícil no Streamlit */
     div.stButton {
-        text-align: center;
         display: flex;
         justify-content: center;
-        width: 100%;
+        align-items: center;
     }
+
     div.stButton > button {
-        width: 100% !important; /* Ocupa a largura do container de 350px */
-        max-width: 350px !important;
+        width: 100% !important;
+        max-width: 300px !important;
         background-color: #0D47A1 !important;
         color: white !important;
         font-weight: bold !important;
         height: 50px;
         border-radius: 8px;
-        margin-top: 15px;
-        border: none;
+        border: 1px solid #1E88E5;
+        margin: 20px auto !important; /* Margem automática nas laterais */
     }
 
-    /* ESTILIZAÇÃO DO SISTEMA (PÓS-LOGIN) */
+    /* Estilo do Terminal (Pós-Login) */
     .brand-title { 
         font-size: 38px !important; font-weight: 800; color: #0D47A1; 
         text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
@@ -76,43 +68,40 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LÓGICA DE ACESSO
+# 3. CONTROLE DE SESSÃO
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
     
-    # Criamos o container centralizado usando colunas de preenchimento
-    _, col_central, _ = st.columns([1.2, 1, 1.2])
+    # Criamos colunas para criar um "corredor" central estreito
+    col_esq, col_central, col_dir = st.columns([1.5, 1, 1.5])
     
     with col_central:
         st.write("##")
-        st.write("##")
-        
-        # Logo com tamanho controlado
+        # Logo centralizada com largura fixa
         try:
             st.image("Alfa.png", width=250)
         except:
-            st.markdown("<h1 style='text-align: center; color: white;'>🛡️ ALFA METAIS</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='font-size: 30px;'>🛡️ ALFA METAIS</h1>", unsafe_allow_html=True)
         
-        st.markdown("<h3 style='text-align: center; color: white;'>Acesso Restrito</h3>", unsafe_allow_html=True)
+        st.markdown("### Terminal de Vendas")
         
-        # Inputs com nomes FORA dos campos
-        user = st.text_input("Usuário")
-        password = st.text_input("Senha", type="password")
+        # Inputs
+        usuario_input = st.text_input("Usuário")
+        senha_input = st.text_input("Senha", type="password")
         
-        # Botão centralizado
+        # Botão
         if st.button("ACESSAR TERMINAL"):
-            if user == "alfa" and password == "metais2026":
+            if usuario_input == "alfa" and senha_input == "metais2026":
                 st.session_state.autenticado = True
                 st.rerun()
             else:
-                st.error("Credenciais inválidas")
+                st.error("Credenciais incorretas!")
 
-# --- SISTEMA ORIGINAL ---
+# --- SISTEMA ORIGINAL (APÓS LOGIN) ---
 else:
-    # 4. Dados e Funções (Tudo mantido conforme seu original)
     metais_dict = {
         "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350.0},
         "Cobre": {"ticker": "HG=F", "premio_padrao": 600.0},
@@ -139,9 +128,9 @@ else:
     # Sidebar
     st.sidebar.header("📋 Parâmetros")
     if st.sidebar.button("🧹 LIMPAR TUDO", on_click=limpar_campos):
-        st.sidebar.info("Resetado!")
+        st.sidebar.info("Dados resetados!")
     
-    if st.sidebar.button("🚪 SAIR"):
+    if st.sidebar.button("🚪 LOGOUT / SAIR"):
         st.session_state.autenticado = False
         st.rerun()
 
@@ -159,7 +148,7 @@ else:
 
     ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
 
-    # Interface Principal
+    # Processamento
     df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
     if not df_hist.empty:
@@ -170,33 +159,41 @@ else:
         comissao_por_kg = preco_kg * (pct_comissao / 100)
 
         st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-        st.markdown('<p style="text-align: center; color: white;">Terminal de Inteligência Comercial</p>', unsafe_allow_html=True)
+        st.markdown('<p style="text-align: center; color: white; margin-bottom: 20px;">Terminal Comercial | alfametaisrepresentacoes.com.br</p>', unsafe_allow_html=True)
 
-        st.write("##")
-        col_m1, col_m2, col_m3 = st.columns(3)
-        col_m1.metric("💵 Dólar", f"R$ {dolar_atual:.2f}")
-        col_m2.metric("🏛️ LME", f"US$ {preco_lme:.2f}")
-        col_m3.metric("🏷️ Prêmio", f"US$ {premio_ajustado:.2f}")
+        # Badges de mercado centralizados
+        st.markdown(f"""
+            <div style="text-align: center; margin-bottom: 25px;">
+                <span style="background:#1A1C24; padding:10px 20px; border-radius:10px; border:1px solid #30363d; margin:5px; display:inline-block;">💵 Dólar: R$ {dolar_atual:.2f}</span>
+                <span style="background:#1A1C24; padding:10px 20px; border-radius:10px; border:1px solid #30363d; margin:5px; display:inline-block;">🏛️ LME: US$ {preco_lme:.2f}</span>
+                <span style="background:#1A1C24; padding:10px 20px; border-radius:10px; border:1px solid #30363d; margin:5px; display:inline-block;">🏷️ Prêmio: US$ {premio_ajustado:.2f}</span>
+            </div>
+        """, unsafe_allow_html=True)
 
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"""<div class="metric-card">
-                <div style="color: #bbb;">💰 Preço de Venda</div>
-                <div style="font-size: 45px; font-weight: 900;">R$ {preco_kg:.2f}/kg</div>
-                <div style="color: #0D47A1;">Total: R$ {venda_total:,.2f}</div>
+                <div style="color: #bbb; font-weight: bold;">💰 Preço de Venda</div>
+                <div style="font-size: 45px; font-weight: 900; color: white;">R$ {preco_kg:.2f}/kg</div>
+                <div style="color: #0D47A1; font-weight: 700;">Total: R$ {venda_total:,.2f}</div>
             </div>""", unsafe_allow_html=True)
 
         with col2:
             st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;">
-                <div style="color: #bbb;">🟢 Sua Comissão ({pct_comissao}%)</div>
+                <div style="color: #bbb; font-weight: bold;">🟢 Sua Comissão ({pct_comissao}%)</div>
                 <div style="font-size: 45px; font-weight: 900; color: #00E676;">R$ {valor_comissao_total:,.2f}</div>
-                <div style="color: #bbb;">Ganho: R$ {comissao_por_kg:.3f}/kg</div>
+                <div style="color: #bbb; font-weight: 700;">Ganho: R$ {comissao_por_kg:.3f}/kg</div>
             </div>""", unsafe_allow_html=True)
 
+        # Gráfico
         fig = go.Figure(go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'].round(2), text=df_hist['Close'].round(2), textposition='outside', marker_color='#0D47A1'))
         fig.update_layout(height=280, margin=dict(l=0,r=0,t=30,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
         st.plotly_chart(fig, use_container_width=True)
 
-
+        # Proposta WhatsApp
+        st.divider()
+        msg_zap = f"""Olá, *{cliente}*! 👋\n\nAbaixo, a cotação oficializada pela *ALFA METAIS REPRESENTAÇÕES* para sua análise:\n\n📦 *MATERIAL:* {produto_sel.upper()}\n💰 *VALOR:* R$ {preco_kg:.2f}/kg\n⚖️ *VOLUME:* {f"{volume_input} {unidade}"}\n------------------------------\n💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}\n------------------------------\n\n🌐 *DADOS DE MERCADO*\n📈 LME: US$ {preco_lme:.2f}\n💵 Câmbio: R$ {dolar_atual:.2f}\n🏷️ Prêmio: US$ {premio_ajustado:.2f}\n\n⏳ *VALIDADE:* 24 Horas\n⚠️ _Preço sujeito a variação conforme fechamento da LME._\n\nFico à disposição para fecharmos! 🤝"""
+        st.subheader("📱 Gerar Proposta WhatsApp")
+        st.code(msg_zap, language="text")
 
 
