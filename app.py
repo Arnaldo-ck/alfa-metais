@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
-# 2. CSS - Foco em Cards Elegantes e Fontes Grandes
+# 2. CSS - Cards Transparentes e Fontes de Alto Contraste
 st.markdown("""
     <style>
     /* Título com contorno branco fino */
@@ -27,30 +27,30 @@ st.markdown("""
         margin-bottom: 25px; 
     }
     
-    /* Cards Brancos Elegantes */
+    /* Cards Transparentes com Borda Branca Suave */
     .metric-card { 
-        background-color: white !important; 
+        background-color: rgba(255, 255, 255, 0.05) !important; 
         padding: 25px; 
         border-radius: 15px; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
         border-bottom: 5px solid #0D47A1;
         margin-bottom: 20px;
     }
     
-    /* Fontes dentro dos Cards */
-    .metric-label { font-size: 20px !important; font-weight: 700; color: #444 !important; text-transform: uppercase; margin-bottom: 10px; }
-    .price-value { font-size: 50px !important; font-weight: 900; color: #0D47A1 !important; line-height: 1; }
-    .profit-value { font-size: 50px !important; font-weight: 900; color: #2E7D32 !important; line-height: 1; }
-    .sub-value { font-size: 22px !important; color: #666 !important; font-weight: 600; margin-top: 8px; }
+    /* Fontes dentro dos Cards (Tudo para Branco/Destaque) */
+    .metric-label { font-size: 20px !important; font-weight: 700; color: #fff !important; text-transform: uppercase; margin-bottom: 10px; }
+    .price-value { font-size: 50px !important; font-weight: 900; color: #fff !important; line-height: 1; }
+    .profit-value { font-size: 50px !important; font-weight: 900; color: #00E676 !important; line-height: 1; } /* Verde neon para destaque */
+    .sub-value { font-size: 22px !important; color: #ccc !important; font-weight: 600; margin-top: 8px; }
 
-    /* Badges de Mercado (Texto Branco e Grande) */
+    /* Badges de Mercado */
     .market-info-container { margin-bottom: 30px; display: flex; flex-wrap: wrap; gap: 15px; }
     .market-badge {
-        background-color: rgba(255,255,255,0.15);
+        background-color: rgba(255,255,255,0.1);
         padding: 12px 20px;
         border-radius: 10px;
         font-weight: 700;
-        font-size: 22px !important; /* Fonte aumentada como solicitado */
+        font-size: 22px !important;
         color: #fff !important;
         border: 1px solid rgba(255,255,255,0.2);
     }
@@ -105,7 +105,6 @@ if not df_hist.empty:
     st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
     st.markdown('<p class="brand-subtitle">Terminal de Inteligência Comercial | alfametaisrepresentacoes.com.br</p>', unsafe_allow_html=True)
 
-    # Badges de Mercado com fontes grandes e brancas
     st.markdown(f"""
         <div class="market-info-container">
             <div class="market-badge">💵 Dólar: R$ {dolar_atual:.2f}</div>
@@ -114,7 +113,7 @@ if not df_hist.empty:
         </div>
     """, unsafe_allow_html=True)
 
-    # 7. Exibição dos Cards (Revertido para Branco Elegante)
+    # 7. Exibição dos Cards Transparentes
     col1, col2 = st.columns(2)
     with col1:
         st.markdown(f"""
@@ -127,10 +126,10 @@ if not df_hist.empty:
 
     with col2:
         st.markdown(f"""
-        <div class="metric-card" style="border-bottom-color: #2E7D32;">
+        <div class="metric-card" style="border-bottom-color: #00E676;">
             <div class="metric-label">🟢 Sua Comissão ({pct_comissao}%)</div>
             <div class="profit-value">R$ {valor_comissao_total:,.2f}</div>
-            <div class="sub-value">Ganhando R$ {comissao_por_kg:.3f} por kg</div>
+            <div class="sub-value">Ganho: R$ {comissao_por_kg:.3f} por kg</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -142,14 +141,22 @@ if not df_hist.empty:
         y=df_hist['Close'].round(2),
         text=df_hist['Close'].round(2),
         textposition='outside',
-        marker_color='#0D47A1'
+        marker_color='#fff'
     ))
-    fig.update_layout(height=300, margin=dict(l=0,r=0,t=30,b=0))
+    fig.update_layout(
+        height=300, 
+        margin=dict(l=0,r=0,t=30,b=0),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        font=dict(color="white")
+    )
     st.plotly_chart(fig, use_container_width=True)
 
     # 9. WhatsApp
     st.divider()
     vol_display = f"{volume_input} Toneladas" if unidade == "Toneladas" else f"{volume_input} KG"
+    
+    # Mensagem WhatsApp (Mantendo a mesma lógica vencedora)
     msg_zap = f"""Olá, *{cliente}*! 👋
 
 Abaixo, a cotação oficializada pela *ALFA METAIS* para sua análise:
@@ -176,7 +183,4 @@ Fico à disposição para fecharmos! 🤝"""
 
 else:
     st.error("Erro na sincronização.")
-
-
-
 
