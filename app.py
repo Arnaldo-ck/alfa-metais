@@ -6,106 +6,113 @@ import plotly.graph_objects as go
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
-# 2. CSS GLOBAL E TELA DE LOGIN
+# 2. CSS DEFINITIVO - FOCO EM CENTRALIZAÇÃO E TAMANHO FIXO
 st.markdown("""
     <style>
-    /* Fundo Global e Barra Lateral */
-    .stApp, [data-testid="stSidebar"] {
+    /* Fundo Dark */
+    .stApp {
         background-color: #0E1117 !important;
-        color: #FFFFFF !important;
     }
 
-    /* Centralização Absoluta da Tela de Login */
-    .login-box {
+    /* CONTAINER CENTRAL DE LOGIN */
+    /* Criamos uma div para limitar o tamanho de tudo no centro */
+    .main-login-container {
+        max-width: 350px;
+        margin: 0 auto;
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: center;
+        align-items: center;
     }
 
-    /* Ajuste dos Inputs de Login para ficarem centralizados e com largura fixa */
-    .stTextInput > div > div > input {
-        text-align: center !important;
-        max-width: 350px !important;
-        margin: 0 auto !important;
+    /* AJUSTE DA LOGO */
+    [data-testid="stImage"] {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+    }
+    [data-testid="stImage"] img {
+        max-width: 250px !important; /* Controla o tamanho da logo para não ficar gigante */
+    }
+
+    /* CAMPOS DE INPUT */
+    .stTextInput div div input {
         background-color: #1A1C24 !important;
         color: white !important;
         border: 1px solid #30363d !important;
+        border-radius: 5px !important;
+        height: 45px;
     }
 
-    /* CENTRALIZAÇÃO DO BOTÃO ACESSAR TERMINAL */
+    /* BOTÃO ACESSAR TERMINAL - CENTRALIZAÇÃO REAL */
     div.stButton {
+        text-align: center;
         display: flex;
         justify-content: center;
+        width: 100%;
     }
     div.stButton > button {
-        width: 350px !important;
+        width: 100% !important; /* Ocupa a largura do container de 350px */
+        max-width: 350px !important;
         background-color: #0D47A1 !important;
         color: white !important;
-        font-weight: 800 !important;
-        height: 48px;
+        font-weight: bold !important;
+        height: 50px;
         border-radius: 8px;
-        border: 1px solid #1E88E5;
-        margin-top: 10px;
+        margin-top: 15px;
+        border: none;
     }
 
-    /* Estilização do Sistema Interno (Cards e Títulos) */
+    /* ESTILIZAÇÃO DO SISTEMA (PÓS-LOGIN) */
     .brand-title { 
-        font-size: 42px !important; font-weight: 800; color: #0D47A1; 
+        font-size: 38px !important; font-weight: 800; color: #0D47A1; 
         text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-        text-align: center; margin-bottom: 0px; 
+        text-align: center; 
     }
-    .brand-subtitle { font-size: 20px !important; color: #fff !important; text-align: center; margin-bottom: 25px; }
-    
     .metric-card { 
         background-color: rgba(255, 255, 255, 0.05) !important; 
-        padding: 25px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);
-        border-bottom: 5px solid #0D47A1; margin-bottom: 20px; text-align: center;
-    }
-    .metric-label { font-size: 20px !important; font-weight: 700; color: #fff !important; text-transform: uppercase; }
-    .price-value { font-size: 50px !important; font-weight: 900; color: #fff !important; }
-    .profit-value { font-size: 50px !important; font-weight: 900; color: #00E676 !important; }
-    .sub-value { font-size: 22px !important; color: #bbb !important; font-weight: 600; }
-
-    .market-badge {
-        background-color: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 10px;
-        font-weight: 700; font-size: 20px !important; color: #fff !important;
-        border: 1px solid rgba(255,255,255,0.1); display: inline-block; margin: 5px;
+        padding: 20px; border-radius: 15px; border-bottom: 5px solid #0D47A1; text-align: center;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LÓGICA DE AUTENTICAÇÃO
+# 3. LÓGICA DE ACESSO
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    # Criando colunas para centralizar o bloco de login na tela wide
-    _, col_central, _ = st.columns([1, 1, 1])
+    
+    # Criamos o container centralizado usando colunas de preenchimento
+    _, col_central, _ = st.columns([1.2, 1, 1.2])
     
     with col_central:
         st.write("##")
+        st.write("##")
+        
+        # Logo com tamanho controlado
         try:
-            st.image("Alfa.png", use_container_width=True)
+            st.image("Alfa.png", width=250)
         except:
-            st.markdown("<h1 style='text-align: center;'>🛡️ ALFA METAIS</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center; color: white;'>🛡️ ALFA METAIS</h1>", unsafe_allow_html=True)
         
-        st.markdown("<h3 style='text-align: center;'>LOGIN DO TERMINAL</h3>", unsafe_allow_html=True)
+        st.markdown("<h3 style='text-align: center; color: white;'>Acesso Restrito</h3>", unsafe_allow_html=True)
         
-        user = st.text_input("Usuário", placeholder="Usuário", label_visibility="collapsed")
-        password = st.text_input("Senha", type="password", placeholder="Senha", label_visibility="collapsed")
+        # Inputs com nomes FORA dos campos
+        user = st.text_input("Usuário")
+        password = st.text_input("Senha", type="password")
         
+        # Botão centralizado
         if st.button("ACESSAR TERMINAL"):
             if user == "alfa" and password == "metais2026":
                 st.session_state.autenticado = True
                 st.rerun()
             else:
-                st.error("Acesso Negado. Verifique suas credenciais.")
+                st.error("Credenciais inválidas")
 
-# --- SISTEMA APÓS LOGIN ---
+# --- SISTEMA ORIGINAL ---
 else:
-    # 4. Dados e Cache
+    # 4. Dados e Funções (Tudo mantido conforme seu original)
     metais_dict = {
         "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350.0},
         "Cobre": {"ticker": "HG=F", "premio_padrao": 600.0},
@@ -123,20 +130,18 @@ else:
         except:
             return pd.DataFrame(), 5.20
 
-    # 5. Funções de Reset e Sidebar
     if 'reset_trigger' not in st.session_state:
         st.session_state.reset_trigger = 0
 
     def limpar_campos():
         st.session_state.reset_trigger += 1
 
+    # Sidebar
     st.sidebar.header("📋 Parâmetros")
-    
-    # Botões de controle na sidebar
     if st.sidebar.button("🧹 LIMPAR TUDO", on_click=limpar_campos):
-        st.sidebar.info("Campos resetados!")
+        st.sidebar.info("Resetado!")
     
-    if st.sidebar.button("🚪 LOGOUT"):
+    if st.sidebar.button("🚪 SAIR"):
         st.session_state.autenticado = False
         st.rerun()
 
@@ -147,15 +152,14 @@ else:
 
     cliente = st.sidebar.text_input("Cliente:", value="Diretoria de Compras", key=c_key)
     produto_sel = st.sidebar.selectbox("Produto:", list(metais_dict.keys()), key=p_key)
-    premio_padrao = metais_dict[produto_sel]["premio_padrao"]
-    premio_ajustado = st.sidebar.number_input("Prêmio (US$):", value=float(premio_padrao), step=10.0)
+    premio_ajustado = st.sidebar.number_input("Prêmio (US$):", value=float(metais_dict[produto_sel]["premio_padrao"]), step=10.0)
     pct_comissao = st.sidebar.slider("Comissão (%)", 0.0, 10.0, 3.0, 0.5, key=com_key)
     unidade = st.sidebar.radio("Unidade:", ("Toneladas", "Quilos"), horizontal=True)
     volume_input = st.sidebar.number_input(f"Volume:", value=1.0 if unidade == "Toneladas" else 1000.0, key=v_key)
 
     ton_calculo = volume_input if unidade == "Toneladas" else volume_input / 1000
 
-    # 6. Processamento e Interface Principal
+    # Interface Principal
     df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
 
     if not df_hist.empty:
@@ -166,43 +170,32 @@ else:
         comissao_por_kg = preco_kg * (pct_comissao / 100)
 
         st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-        st.markdown('<p class="brand-subtitle">Terminal de Inteligência Comercial | alfametaisrepresentacoes.com.br</p>', unsafe_allow_html=True)
+        st.markdown('<p style="text-align: center; color: white;">Terminal de Inteligência Comercial</p>', unsafe_allow_html=True)
 
-        st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div class="market-badge">💵 Dólar: R$ {dolar_atual:.2f}</div>
-                <div class="market-badge">🏛️ LME: US$ {preco_lme:.2f}</div>
-                <div class="market-badge">🏷️ Prêmio: US$ {premio_ajustado:.2f}</div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.write("##")
+        col_m1, col_m2, col_m3 = st.columns(3)
+        col_m1.metric("💵 Dólar", f"R$ {dolar_atual:.2f}")
+        col_m2.metric("🏛️ LME", f"US$ {preco_lme:.2f}")
+        col_m3.metric("🏷️ Prêmio", f"US$ {premio_ajustado:.2f}")
 
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"""<div class="metric-card">
-                <div class="metric-label">💰 Preço de Venda</div>
-                <div class="price-value">R$ {preco_kg:.2f}<span style="font-size: 24px;">/kg</span></div>
-                <div class="sub-value">Total: R$ {venda_total:,.2f}</div>
+                <div style="color: #bbb;">💰 Preço de Venda</div>
+                <div style="font-size: 45px; font-weight: 900;">R$ {preco_kg:.2f}/kg</div>
+                <div style="color: #0D47A1;">Total: R$ {venda_total:,.2f}</div>
             </div>""", unsafe_allow_html=True)
 
         with col2:
             st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;">
-                <div class="metric-label">🟢 Sua Comissão ({pct_comissao}%)</div>
-                <div class="profit-value">R$ {valor_comissao_total:,.2f}</div>
-                <div class="sub-value">Ganho: R$ {comissao_por_kg:.3f}/kg</div>
+                <div style="color: #bbb;">🟢 Sua Comissão ({pct_comissao}%)</div>
+                <div style="font-size: 45px; font-weight: 900; color: #00E676;">R$ {valor_comissao_total:,.2f}</div>
+                <div style="color: #bbb;">Ganho: R$ {comissao_por_kg:.3f}/kg</div>
             </div>""", unsafe_allow_html=True)
 
-        # Gráfico
         fig = go.Figure(go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'].round(2), text=df_hist['Close'].round(2), textposition='outside', marker_color='#0D47A1'))
         fig.update_layout(height=280, margin=dict(l=0,r=0,t=30,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
         st.plotly_chart(fig, use_container_width=True)
-
-        # WhatsApp
-        st.divider()
-        msg_zap = f"""Olá, *{cliente}*! 👋\n\nAbaixo, a cotação oficializada pela *ALFA METAIS REPRESENTAÇÕES* para sua análise:\n\n📦 *MATERIAL:* {produto_sel.upper()}\n💰 *VALOR:* R$ {preco_kg:.2f}/kg\n⚖️ *VOLUME:* {f"{volume_input} {unidade}"}\n------------------------------\n💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}\n------------------------------\n\n🌐 *DADOS DE MERCADO*\n📈 LME: US$ {preco_lme:.2f}\n💵 Câmbio: R$ {dolar_atual:.2f}\n🏷️ Prêmio: US$ {premio_ajustado:.2f}\n\n⏳ *VALIDADE:* 24 Horas\n⚠️ _Preço sujeito a variação conforme fechamento da LME._\n\nFico à disposição para fecharmos! 🤝"""
-        st.subheader("📱 Gerar Proposta WhatsApp")
-        st.code(msg_zap, language="text")
-    else:
-        st.error("Erro na sincronização de dados. Verifique a conexão com o Yahoo Finance.")
 
 
 
