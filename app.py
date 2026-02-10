@@ -2,78 +2,48 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
+import base64
 
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Login", layout="wide", page_icon="🛡️")
 
-# 2. CSS - ESTILO DARK E CENTRALIZAÇÃO REFORÇADA
+# Função para converter imagem local para base64 (necessário para o HTML injetado)
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+# 2. CSS Global
 st.markdown("""
     <style>
-    /* Fundo Global */
-    .stApp, [data-testid="stSidebar"] {
-        background-color: #0E1117 !important;
-        color: #FFFFFF !important;
-    }
-
-    /* Forçar centralização de todos os elementos na coluna */
-    [data-testid="stVerticalBlock"] > div {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-
-    /* Ajuste específico da Logo */
-    [data-testid="stImage"] {
-        display: flex;
-        justify-content: center !important;
-        width: 100%;
-        margin-bottom: 5px;
-    }
-
-    /* Título Centralizado e Corrigido */
-    .brand-title-login { 
-        font-size: 32px !important; 
-        font-weight: 800; 
-        color: #0D47A1; 
-        text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-        text-align: center;
-        margin-bottom: 20px;
-        width: 100%;
-    }
-
-    /* Campos de Login e Botão - Largura Estrita */
-    .stTextInput, .stButton {
-        width: 280px !important; /* Diminuído para dar aspecto mais elegante */
-        margin: 0 auto !important;
-    }
+    .stApp { background-color: #0E1117 !important; }
+    [data-testid="stSidebar"] { background-color: #0E1117 !important; }
     
-    input {
+    /* Esconder elementos desnecessários na tela de login */
+    .stDeployButton, footer, header {visibility: hidden;}
+    
+    /* Estilo dos campos de entrada que o Streamlit ainda controla */
+    .stTextInput input {
         text-align: center !important;
         background-color: #1A1C24 !important;
         color: white !important;
         border: 1px solid #30363d !important;
     }
-
-    /* Botão Acessar */
+    
+    /* Botão de Acesso */
     div.stButton > button {
         width: 100% !important;
+        max-width: 300px;
         background-color: #0D47A1 !important;
         color: white !important;
         border: 1px solid #fff !important;
         font-weight: 700;
-        margin-top: 15px;
+        display: block;
+        margin: 0 auto;
     }
 
-    /* Esconder Labels */
+    /* Centralização dos placeholders e labels */
     label { display: none !important; }
-
-    /* Estilo do Terminal */
-    .metric-card { 
-        background-color: rgba(255, 255, 255, 0.05) !important; 
-        padding: 20px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);
-        border-bottom: 5px solid #0D47A1; margin-bottom: 15px;
-    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -81,48 +51,62 @@ st.markdown("""
 if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
-def validar_login(user, pwd):
-    USUARIO_CORRETO = "contato@alfametaisrepresentacoes.com.br"
-    SENHA_CORRETA = "alfa2026"
-    if user == USUARIO_CORRETO and pwd == SENHA_CORRETA:
-        st.session_state.autenticado = True
-        st.rerun()
-    else:
-        st.error("Dados incorretos.")
-
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    st.write("<br><br><br>", unsafe_allow_html=True)
-    
-    # Colunas mais estreitas no centro para forçar o agrupamento
-    _, center_col, _ = st.columns([1.2, 1, 1.2])
+    # 3.1 Construção do Cabeçalho Centralizado em HTML Puro
+    try:
+        img_base64 = get_base64_of_bin_file("Alfa.png")
+        header_html = f"""
+            <div style="text-align: center; width: 100%;">
+                <img src="data:image/png;base64,{img_base64}" width="200" style="margin-bottom: 10px;">
+                <h1 style="
+                    font-size: 36px; 
+                    font-weight: 800; 
+                    color: #0D47A1; 
+                    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+                    margin-top: 0px;
+                    margin-bottom: 20px;
+                    font-family: sans-serif;
+                ">ALFA METAIS REPRESENTAÇÕES</h1>
+            </div>
+        """
+    except:
+        header_html = """
+            <div style="text-align: center; width: 100%;">
+                <h1 style="color: #0D47A1; text-shadow: 1px 1px #fff;">🛡️ ALFA METAIS REPRESENTAÇÕES</h1>
+            </div>
+        """
+
+    # Exibe o cabeçalho centralizado
+    st.write("<br><br>", unsafe_allow_html=True)
+    st.markdown(header_html, unsafe_allow_html=True)
+
+    # 3.2 Campos de Login (Usando colunas apenas para limitar a largura)
+    _, center_col, _ = st.columns([1.5, 1, 1.5])
     
     with center_col:
-        # Logo reduzida para 220px para facilitar a centralização
-        try:
-            st.image("Alfa.png", width=220)
-        except:
-            st.markdown("<h3 style='text-align: center;'>🛡️ ALFA METAIS</h3>", unsafe_allow_html=True)
-        
-        st.markdown('<p class="brand-title-login">ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-        
         user_input = st.text_input("E-mail", placeholder="E-mail de Acesso")
         pass_input = st.text_input("Senha", type="password", placeholder="Sua Senha")
         
+        st.write("") # Espaçador
+        
         if st.button("ACESSAR TERMINAL"):
-            validar_login(user_input, pass_input)
+            if user_input == "contato@alfametaisrepresentacoes.com.br" and pass_input == "alfa2026":
+                st.session_state.autenticado = True
+                st.rerun()
+            else:
+                st.error("Dados incorretos.")
 
 # --- TERMINAL DE VENDAS ---
 else:
-    # (O restante do código do terminal permanece igual à versão anterior)
-    st.sidebar.title("🛡️ ALFA METAIS")
+    # (Código do Terminal permanece o mesmo das versões estáveis anteriores)
+    st.sidebar.image("Alfa.png", use_container_width=True)
     if st.sidebar.button("🚪 SAIR"):
         st.session_state.autenticado = False
         st.rerun()
     
-    # Conteúdo do Terminal...
-    st.markdown('<p class="brand-title-login" style="font-size:28px !important;">ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-    st.info("Terminal de Vendas Ativo - Utilize a barra lateral para operar.")
+    st.markdown(f'<h1 style="text-align: center; color: #0D47A1; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;">🛡️ ALFA METAIS REPRESENTAÇÕES</h1>', unsafe_allow_html=True)
+    st.success("Painel de Vendas Liberado")
 
 
 
