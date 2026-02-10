@@ -6,16 +6,28 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Intelligence", layout="wide", page_icon="🛡️")
 
-# 2. CSS - TEMA DARK FORÇADO E LAYOUT
+# 2. CSS - FORÇAR DARK MODE NO FUNDO E NA BARRA LATERAL
 st.markdown("""
     <style>
-    /* Forçar Fundo Escuro em toda a aplicação */
-    .stApp {
+    /* 1. Fundo Global e Barra Lateral */
+    .stApp, [data-testid="stSidebar"], .st-emotion-cache-6qob1r {
         background-color: #0E1117 !important;
         color: #FFFFFF !important;
     }
-    
-    /* Título com contorno branco fino */
+
+    /* 2. Forçar cor dos textos e títulos na Barra Lateral */
+    [data-testid="stSidebar"] .stMarkdown p, [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] span {
+        color: #FFFFFF !important;
+    }
+
+    /* 3. Estilização dos Inputs (para não sumirem no fundo escuro) */
+    input {
+        background-color: #1A1C24 !important;
+        color: white !important;
+        border: 1px solid #30363d !important;
+    }
+
+    /* 4. Título Principal com contorno */
     .brand-title { 
         font-size: 42px !important; 
         font-weight: 800; 
@@ -32,7 +44,7 @@ st.markdown("""
         margin-bottom: 25px; 
     }
     
-    /* Cards com fundo levemente visível para destacar no Dark Mode */
+    /* 5. Cards Transparentes */
     .metric-card { 
         background-color: rgba(255, 255, 255, 0.05) !important; 
         padding: 25px; 
@@ -58,11 +70,6 @@ st.markdown("""
         display: inline-block;
         margin-right: 15px;
         margin-bottom: 10px;
-    }
-
-    /* Ajuste para inputs na barra lateral ficarem legíveis */
-    .stTextInput>div>div>input, .stNumberInput>div>div>input {
-        color: #fff !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -102,7 +109,6 @@ st.sidebar.header("📋 Parâmetros")
 if st.sidebar.button("🧹 LIMPAR TUDO", on_click=limpar_campos):
     st.sidebar.info("Campos resetados!")
 
-# Usando o reset_trigger no key para forçar o recarregamento dos widgets
 c_key = f"cliente_{st.session_state.reset_trigger}"
 v_key = f"volume_{st.session_state.reset_trigger}"
 p_key = f"produto_{st.session_state.reset_trigger}"
@@ -110,10 +116,8 @@ com_key = f"comissao_{st.session_state.reset_trigger}"
 
 cliente = st.sidebar.text_input("Cliente:", value="Diretoria de Compras", key=c_key)
 produto_sel = st.sidebar.selectbox("Produto:", list(metais_dict.keys()), key=p_key)
-
 premio_padrao = metais_dict[produto_sel]["premio_padrao"]
 premio_ajustado = st.sidebar.number_input("Prêmio (US$):", value=float(premio_padrao), step=10.0)
-
 pct_comissao = st.sidebar.slider("Comissão (%)", 0.0, 10.0, 3.0, 0.5, key=com_key)
 unidade = st.sidebar.radio("Unidade:", ("Toneladas", "Quilos"), horizontal=True)
 volume_input = st.sidebar.number_input(f"Volume:", value=1.0 if unidade == "Toneladas" else 1000.0, key=v_key)
@@ -133,7 +137,6 @@ if not df_hist.empty:
     st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
     st.markdown('<p class="brand-subtitle">Terminal de Inteligência Comercial | alfametaisrepresentacoes.com.br</p>', unsafe_allow_html=True)
 
-    # Indicadores de Mercado
     st.markdown(f"""
         <div style="margin-bottom: 20px;">
             <div class="market-badge">💵 Dólar: R$ {dolar_atual:.2f}</div>
@@ -157,15 +160,12 @@ if not df_hist.empty:
             <div class="sub-value">Ganho: R$ {comissao_por_kg:.3f}/kg</div>
         </div>""", unsafe_allow_html=True)
 
-    # Gráfico adaptado para fundo escuro
     fig = go.Figure(go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'].round(2), text=df_hist['Close'].round(2), textposition='outside', marker_color='#0D47A1'))
     fig.update_layout(height=280, margin=dict(l=0,r=0,t=30,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
     st.plotly_chart(fig, use_container_width=True)
 
-    # WhatsApp
     st.divider()
-    vol_display = f"{volume_input} Toneladas" if unidade == "Toneladas" else f"{volume_input} KG"
-    msg_zap = f"""Olá, *{cliente}*! 👋\n\nAbaixo, a cotação oficializada pela *ALFA METAIS REPRESENTAÇÕES* para sua análise:\n\n📦 *MATERIAL:* {produto_sel.upper()}\n💰 *VALOR:* R$ {preco_kg:.2f}/kg\n⚖️ *VOLUME:* {vol_display}\n------------------------------\n💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}\n------------------------------\n\n🌐 *DADOS DE MERCADO*\n📈 LME: US$ {preco_lme:.2f}\n💵 Câmbio: R$ {dolar_atual:.2f}\n🏷️ Prêmio: US$ {premio_ajustado:.2f}\n\n⏳ *VALIDADE:* 24 Horas\n⚠️ _Preço sujeito a variação conforme fechamento da LME._\n\nFico à disposição para fecharmos! 🤝"""
+    msg_zap = f"""Olá, *{cliente}*! 👋\n\nAbaixo, a cotação oficializada pela *ALFA METAIS REPRESENTAÇÕES* para sua análise:\n\n📦 *MATERIAL:* {produto_sel.upper()}\n💰 *VALOR:* R$ {preco_kg:.2f}/kg\n⚖️ *VOLUME:* {f"{volume_input} {unidade}"}\n------------------------------\n💵 *TOTAL DO PEDIDO:* R$ {venda_total:,.2f}\n------------------------------\n\n🌐 *DADOS DE MERCADO*\n📈 LME: US$ {preco_lme:.2f}\n💵 Câmbio: R$ {dolar_atual:.2f}\n🏷️ Prêmio: US$ {premio_ajustado:.2f}\n\n⏳ *VALIDADE:* 24 Horas\n⚠️ _Preço sujeito a variação conforme fechamento da LME._\n\nFico à disposição para fecharmos! 🤝"""
     st.subheader("📱 Gerar Proposta WhatsApp")
     st.code(msg_zap, language="text")
 else:
