@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 # 1. Configuração da Página
 st.set_page_config(page_title="ALFA METAIS - Login", layout="wide", page_icon="🛡️")
 
-# 2. CSS - ESTILO DARK TOTAL E LOGIN CENTRALIZADO
+# 2. CSS - ESTILO DARK TOTAL E CENTRALIZAÇÃO ABSOLUTA
 st.markdown("""
     <style>
     /* Fundo Global */
@@ -15,13 +15,28 @@ st.markdown("""
         color: #FFFFFF !important;
     }
 
-    /* Centralização da tela de Login */
-    .login-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        margin-top: 50px;
+    /* Centralização Total da Logo e Título */
+    .stImage > img {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .centered-text {
+        text-align: center;
+        width: 100%;
+    }
+
+    /* Título com contorno branco fino */
+    .brand-title-login { 
+        font-size: 48px !important; 
+        font-weight: 800; 
+        color: #0D47A1; 
+        text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 30px;
+        letter-spacing: 2px;
     }
 
     /* Estilização dos Inputs */
@@ -29,19 +44,9 @@ st.markdown("""
         background-color: #1A1C24 !important;
         color: white !important;
         border: 1px solid #30363d !important;
-        border-radius: 5px;
     }
 
-    /* Título com contorno */
-    .brand-title { 
-        font-size: 42px !important; 
-        font-weight: 800; 
-        color: #0D47A1; 
-        text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-        text-align: center;
-    }
-
-    /* Cards e Badges do Terminal */
+    /* Estilo do Terminal */
     .metric-card { 
         background-color: rgba(255, 255, 255, 0.05) !important; 
         padding: 25px; border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.1);
@@ -60,10 +65,8 @@ if 'autenticado' not in st.session_state:
     st.session_state.autenticado = False
 
 def validar_login(user, pwd):
-    # Substitua pelo seu e-mail e senha de preferência
     USUARIO_CORRETO = "contato@alfametaisrepresentacoes.com.br"
     SENHA_CORRETA = "alfa2026"
-    
     if user == USUARIO_CORRETO and pwd == SENHA_CORRETA:
         st.session_state.autenticado = True
         st.rerun()
@@ -72,28 +75,32 @@ def validar_login(user, pwd):
 
 # --- TELA DE LOGIN ---
 if not st.session_state.autenticado:
-    col_l1, col_l2, col_l3 = st.columns([1, 1, 1])
+    # Espaçamento superior para centralizar verticalmente
+    st.write("<br><br>", unsafe_allow_html=True)
+    
+    col_l1, col_l2, col_l3 = st.columns([1, 2, 1])
     
     with col_l2:
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        # Centralizando a Logo
         try:
-            st.image("Alfa.png", width=250)
+            st.image("Alfa.png", width=350)
         except:
-            st.markdown("### 🛡️ ALFA METAIS")
+            st.markdown("<h2 style='text-align: center;'>🛡️ ALFA METAIS</h2>", unsafe_allow_html=True)
         
-        st.markdown('<p class="brand-title">REPRESENTAÇÕES</p>', unsafe_allow_html=True)
-        st.write("")
+        # Título Centralizado com o nome corrigido
+        st.markdown('<p class="brand-title-login">ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
-        user_input = st.text_input("E-mail de Acesso")
-        pass_input = st.text_input("Senha", type="password")
+        # Inputs centralizados através da coluna
+        user_input = st.text_input("E-mail de Acesso", placeholder="seu@email.com")
+        pass_input = st.text_input("Senha", type="password", placeholder="********")
         
+        st.write("<br>", unsafe_allow_html=True)
         if st.button("ACESSAR TERMINAL", use_container_width=True):
             validar_login(user_input, pass_input)
-        st.markdown('</div>', unsafe_allow_html=True)
 
-# --- TERMINAL DE VENDAS (SÓ ABRE SE AUTENTICADO) ---
+# --- TERMINAL DE VENDAS ---
 else:
-    # 4. Dados e Funções (Mesma lógica anterior)
+    # 4. Dados (Mantendo sua lógica funcional)
     metais_dict = {
         "Alumínio P1020": {"ticker": "ALI=F", "premio_padrao": 350.0},
         "Cobre": {"ticker": "HG=F", "premio_padrao": 600.0},
@@ -108,13 +115,12 @@ else:
             dolar_info = yf.Ticker("USDBRL=X").history(period="1d")
             dolar = dolar_info['Close'].iloc[-1]
             return data, dolar
-        except:
-            return pd.DataFrame(), 5.20
+        except: return pd.DataFrame(), 5.20
 
-    # 5. Barra Lateral e Botão Limpar
     if 'reset_trigger' not in st.session_state: st.session_state.reset_trigger = 0
     def limpar_campos(): st.session_state.reset_trigger += 1
     
+    # Barra Lateral
     st.sidebar.button("🧹 LIMPAR TUDO", on_click=limpar_campos)
     if st.sidebar.button("🚪 SAIR"):
         st.session_state.autenticado = False
@@ -122,24 +128,22 @@ else:
 
     c_key = f"c_{st.session_state.reset_trigger}"
     v_key = f"v_{st.session_state.reset_trigger}"
-    p_key = f"p_{st.session_state.reset_trigger}"
     
     cliente = st.sidebar.text_input("Cliente:", value="Diretoria de Compras", key=c_key)
-    produto_sel = st.sidebar.selectbox("Produto:", list(metais_dict.keys()), key=p_key)
+    produto_sel = st.sidebar.selectbox("Produto:", list(metais_dict.keys()))
     premio_padrao = metais_dict[produto_sel]["premio_padrao"]
     premio_ajustado = st.sidebar.number_input("Prêmio (US$):", value=float(premio_padrao), step=10.0)
     pct_comissao = st.sidebar.slider("Comissão (%)", 0.0, 10.0, 3.0, 0.5)
     unidade = st.sidebar.radio("Unidade:", ("Toneladas", "Quilos"), horizontal=True)
     volume_input = st.sidebar.number_input(f"Volume:", value=1.0 if unidade == "Toneladas" else 1000.0, key=v_key)
 
-    # 6. Processamento e Visualização
     df_hist, dolar_atual = carregar_dados_metal(metais_dict[produto_sel]["ticker"])
     if not df_hist.empty:
         preco_lme = df_hist['Close'].iloc[-1]
         preco_kg = ((preco_lme + premio_ajustado) * dolar_atual) / 1000
         venda_total = preco_kg * (volume_input if unidade == "Toneladas" else volume_input / 1000) * 1000
 
-        st.markdown('<p class="brand-title">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
+        st.markdown('<p class="brand-title-login" style="font-size:32px !important;">🛡️ ALFA METAIS REPRESENTAÇÕES</p>', unsafe_allow_html=True)
         
         st.markdown(f"""
             <div style="margin-bottom: 20px; text-align: center;">
@@ -152,12 +156,15 @@ else:
         col1, col2 = st.columns(2)
         with col1:
             st.markdown(f"""<div class="metric-card"><div class="metric-label">💰 Preço de Venda</div>
-            <div class="price-value">R$ {preco_kg:.2f}/kg</div><div class="sub-value">Total: R$ {venda_total:,.2f}</div></div>""", unsafe_allow_html=True)
+            <div class="price-value">R$ {preco_kg:.2f}<small style="font-size:18px">/kg</small></div><div class="sub-value">Total: R$ {venda_total:,.2f}</div></div>""", unsafe_allow_html=True)
         with col2:
             st.markdown(f"""<div class="metric-card" style="border-bottom-color: #00E676;"><div class="metric-label">🟢 Comissão</div>
-            <div class="profit-value">R$ {venda_total * (pct_comissao/100):,.2f}</div><div class="sub-value">{pct_comissao}% do pedido</div></div>""", unsafe_allow_html=True)
+            <div class="profit-value">R$ {venda_total * (pct_comissao/100):,.2f}</div><div class="sub-value">{pct_comissao}% de comissão</div></div>""", unsafe_allow_html=True)
 
-        st.plotly_chart(go.Figure(data=[go.Bar(x=df_hist.index, y=df_hist['Close'], marker_color='#0D47A1')], layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), height=250)), use_container_width=True)
+        fig = go.Figure(data=[go.Bar(x=df_hist.index.strftime('%d/%m'), y=df_hist['Close'], marker_color='#0D47A1')])
+        fig.update_layout(height=250, margin=dict(l=0,r=0,t=0,b=0), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+        st.plotly_chart(fig, use_container_width=True)
+
 
 
 
